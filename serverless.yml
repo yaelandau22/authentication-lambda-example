@@ -1,0 +1,25 @@
+service: authentication-lambda-example
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+
+functions:
+  auth:
+    handler: authorizer.handler
+    environment: 
+      CERTS_PATH: 'https://<your-iam-service-url.com>/auth/realms/<your-realm-name>'
+      CERTS_PATH_SUFFIX: '/protocol/openid-connect/certs'
+
+  helloWorld:
+    handler: helloWorld.handler
+    events:
+      - http:
+          path: helloWorld
+          method: post
+          authorizer:
+            name: auth
+            resultTtlInSeconds: 3600
+            identitySource: method.request.header.Authorization
+            type: token
